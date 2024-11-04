@@ -1,0 +1,52 @@
+.landing-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f4ff;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    margin: 20px;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.create-account {
+    padding: 10px 20px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.content {
+    text-align: center;
+}
+
+.content h1 {
+    font-size: 2.5em;
+}
+
+.content p {
+    margin: 20px 0;
+    font-size: 1.2em;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+.buttons button {
+    padding: 10px 15px;
+    margin: 5px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
