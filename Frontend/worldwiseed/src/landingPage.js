@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './landingPage.css'; // Importing the CSS file for styling
+import LoginPopup from './LoginPopup';
 
 
 const LandingPage = () => {
@@ -16,12 +17,7 @@ const LandingPage = () => {
                 <p>Apply to university abroad and perfect your application with the help of our consultants. Navigate your application journey with WorldWiseEd.</p>
                 <img src='landingImage.png' alt='World Wide Education' />
                 <div className='buttons'>
-                    <Link to='/student-login'>
-                        <button>Student Log in</button>
-                    </Link>
-                    <Link to='/consultant-login'>
-                        <button>Consultant Log in</button>
-                    </Link>
+                    <LoginPopup />
                 </div>
             </div>
         </div>
