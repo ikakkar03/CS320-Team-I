@@ -36,3 +36,7 @@
 .submit-btn:hover {
   background-color: #111B47;
 }
+
+#forgot-pass{
+  float: right;
+}

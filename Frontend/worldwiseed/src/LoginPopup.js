@@ -35,8 +35,12 @@ const LoginPopup = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
+                             <div id="forgot-pass" className="float-right">
+                             <label>Forgot Password</label>
+                             </div>   
                             <button type="submit" className="submit-btn">Sign in</button>
                         </form>
+                                
                     </div>
                 </div>
             )}
