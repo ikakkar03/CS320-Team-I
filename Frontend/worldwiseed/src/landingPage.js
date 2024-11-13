@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './landingPage.css'; // Importing the CSS file for styling
+import './landingPage.css'; 
 import LoginPopup from './LoginPopup';
 
 

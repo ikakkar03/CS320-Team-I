@@ -19,23 +19,23 @@ const LoginPopup = () => {
                 <div className="modal-overlay">
                     <div className="modal">
                         <button className="close-btn" onClick={() => setIsOpen(false)}>×</button>
-                        <h2>Login</h2>
+                        <h2>Student Login</h2>
                         <form onSubmit={handleLogin}>
-                            <label htmlFor="username">Username:</label>
+                            <label htmlFor="Username">Email:</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                             />
-                            <label htmlFor="password">Password:</label>
+                            <label htmlFor="Password">Password:</label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
-                            <button type="submit" className="submit-btn">Login</button>
+                            <button type="submit" className="submit-btn">Sign in</button>
                         </form>
                     </div>
                 </div>

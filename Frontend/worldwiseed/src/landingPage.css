@@ -41,15 +41,6 @@
     margin-top: 20px;
 }
 
-.buttons button {
-    padding: 10px 15px;
-    margin: 5px;
-    background-color: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
 
 .modal-overlay {
     position: fixed;
@@ -99,18 +90,3 @@ input {
     color: rgb(0, 0, 0);
 }
 
-
-.submit-btn {
-    padding: 0.5rem;
-    background-color: #61dafb;
-    color: white;
-    border: none;
-    width: 100%;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.submit-btn:hover {
-    background-color: #50aee3;
-}
