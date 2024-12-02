@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './LoginPopup.css';
 
 const LoginPopup = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
     const handleLogin = (e) => {
         e.preventDefault();
-        console.log('Login:', { email, password });
-        // Add login logic 
+        console.log('Login button clicked.');
+        navigate('/dashboard'); // Redirect to dashboard without authentication
     };
 
     return (
@@ -21,26 +21,15 @@ const LoginPopup = () => {
                         <button className="close-btn" onClick={() => setIsOpen(false)}>×</button>
                         <h2>Student Login</h2>
                         <form onSubmit={handleLogin}>
-                            <label htmlFor="Username">Email:</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                            <label htmlFor="Password">Password:</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                             <div id="forgot-pass" className="float-right">
-                             <label>Forgot Password</label>
-                             </div>   
+                            <label>Email:</label>
+                            <input type="email" placeholder="Enter email" required />
+                            <label>Password:</label>
+                            <input type="password" placeholder="Enter password" required />
+                            <div id="forgot-pass">
+                                <label>Forgot Password?</label>
+                            </div>
                             <button type="submit" className="submit-btn">Sign in</button>
                         </form>
-                                
                     </div>
                 </div>
             )}
