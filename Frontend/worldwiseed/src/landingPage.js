@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import illustrationImage from './landingImage.png';
 import { Link } from 'react-router-dom';
+import './landingPage.css'; 
+import LoginPopup from './LoginPopup';
 
 
 const LandingPage = () => {

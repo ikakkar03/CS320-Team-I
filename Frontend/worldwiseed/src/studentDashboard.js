@@ -1,7 +1,34 @@
-import React from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import styled from 'styled-components';
 
     function StudentDashboard() {
+
+        const [taskArr, setTaskArr] = useState([]);
+        const inputTaskRef = useRef(null);
+        useEffect(() => {
+            const inputTask = inputTaskRef.current;
+
+            const handleKeyUp = (e) => {
+              if (e.key === 'Enter') {
+                const newTask = inputTask.value;
+                if (newTask.trim()) {
+                    setTaskArr((prevTasks) => [...prevTasks, newTask]);
+                    inputTask.value = '';  
+                  }
+              }
+            };
+        
+            inputTask.addEventListener('keyup', handleKeyUp);
+
+            return () => {
+              inputTask.removeEventListener('keyup', handleKeyUp);
+            };
+          }, []);
+
+        const removeTask = (index) => {
+            setTaskArr((prevTasks) => prevTasks.filter((task, i) => i !== index));
+        };
+
         return (
         <Container>
             <NavBar>
@@ -12,10 +39,17 @@ import styled from 'styled-components';
             <MainContent>
                 <Widget>
                     <h3>Application Checklist</h3>
-                    <WidgetBody>
-
+                    <WidgetBody id='checklist'>
+                        {taskArr.map((task, index) => (
+                            //<div key={index}>{task}</div> 
+                            <TaskContainer>
+                                <Checkbox type='checkbox'></Checkbox>
+                                <div key={index}>{task}</div> 
+                                <RemoveButton onClick={() => removeTask(index)}>X</RemoveButton>
+                            </TaskContainer>
+                        ))}
                     </WidgetBody>
-                    <InputTask type='text' placeholder='Add new...'/>
+                    <InputTask ref={inputTaskRef} id='inputTask' type='text' placeholder='Add new...'/>
                 </Widget>
                 <Widget>
                     <h3>Saved Colleges</h3>
@@ -26,18 +60,22 @@ import styled from 'styled-components';
                 </Widget>
                 <Widget>
                     <h3>Colleges Applied To</h3>
+                    <WidgetBody>
+
+                    </WidgetBody>
                 </Widget>
             </MainContent>
         </Container>
         );
     };
 
+
     const Container = styled.div`
         background-color: #D9D9D9;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         height: 100vh;
         width: 100vw;
-`;
+    `;
 
     const NavBar = styled.div`
         background-color: #E4F2FF;
@@ -67,13 +105,14 @@ import styled from 'styled-components';
         align-items: center;
     `;
 
-    const WidgetBody = styled.input`
+    const WidgetBody = styled.div`
         display: flex;
         flex-direction: column;
         background-color: #FFFFFF;
         height: 60vh;
         width: 100%;
         border: none;
+        overflow-y: auto;
     `;
 
     const InputTask = styled.input`
@@ -81,6 +120,24 @@ import styled from 'styled-components';
         width: 10vw;
         border-radius: 0.3vw;
         border: .1vw solid #E9E9E9;
+    `;
+
+    const TaskContainer = styled.div`
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.5vh;
+    `;
+
+    const Checkbox = styled.input`
+    margin-right: 10px;
+    transform: scale(1.2);
+    `;
+
+    const RemoveButton = styled.button`
+        border: none;
+        background-color: #FF0000;
+        color: #FFFFFF;
     `;
 
     const CollegeSearchButton = styled.button`
