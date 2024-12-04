@@ -244,5 +244,34 @@ app.get('/api/student/:student_id/university-list', async (req, res) => {
     console.error('Error fetching student university list:', error);
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
+
+  // ADD NEW TASK TO THE CHECKLIST
+app.post('/api/checklist', async (req, res) => {
+  const { student_id, task_name } = req.body;
+
+  if (!student_id || !task_name) {
+    return res.status(400).json({ error: 'Student ID and task name are required.' });
+  }
+
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `INSERT INTO application_checklist (student_id, task_name) 
+       VALUES ($1, $2) 
+       RETURNING *`,
+      [student_id, task_name]
+    );
+
+    res.status(201).json({
+      message: 'Task added successfully',
+      task: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Error adding task:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
 });
 
