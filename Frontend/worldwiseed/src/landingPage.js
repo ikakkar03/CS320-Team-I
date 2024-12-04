@@ -1,6 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import illustrationImage from './landingImage.png';
+import { Link } from 'react-router-dom';
+import './landingPage.css'; 
+import LoginPopup from './LoginPopup';
 
 
 const LandingPage = () => {
@@ -24,7 +27,9 @@ const LandingPage = () => {
             WorldWiseEd.
           </SubText>
           <ButtonContainer>
-            <StudentLoginButton>Student Log in</StudentLoginButton>
+            <Link to="/student-login">
+              <StudentLoginButton>Student Log in</StudentLoginButton>
+            </Link>
             <ConsultantLoginButton>Consultant Log in</ConsultantLoginButton>
           </ButtonContainer>
         </TextSection>

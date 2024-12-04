@@ -27,6 +27,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LandingPage from './landingPage';
+import StudentDashboard from './studentDashboard';
 
 function App() {
   return (
@@ -35,7 +36,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         {/* Define routes for other components here */}
         <Route path="/create-account" element={<h2>Create Account Page</h2>} />
-        <Route path="/student-login" element={<h2>Student Login Page</h2>} />
+        <Route path="/student-login" element={<StudentDashboard/>} />
         <Route path="/consultant-login" element={<h2>Consultant Login Page</h2>} />
       </Routes>
     </Router>
