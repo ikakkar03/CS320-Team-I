@@ -4,13 +4,15 @@ import LandingPage from './LandingPage';
 import StudentDashboard from './StudentDashboard';
 //import ConsultantDashboard from './ConsultantDashboard';
 
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/student-dashboard" element={<StudentDashboard />} />
-        <Route path="/create-account" element={<h2>Create Account Page</h2>} />
+
+        <Route path="/student-login" element={<StudentDashboard/>} />
+        <Route path="/consultant-login" element={<h2>Consultant Login Page</h2>} />
+
       </Routes>
     </Router>
   );

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';  // Import useNavigate for redirection
+import { useNavigate } from 'react-router-dom';  
 import illustrationImage from './landingImage.png';
 import LoginPopup from './LoginPopup';
 
 const LandingPage = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [loginType, setLoginType] = useState('');
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate(); 
 
   const togglePopup = (type = '') => {
     setIsPopupOpen(!isPopupOpen);
@@ -15,12 +15,11 @@ const LandingPage = () => {
   };
 
   const handleLogin = (type) => {
-    setIsPopupOpen(false); // Close the login popup after successful login
-    // Redirect to respective dashboard
+    setIsPopupOpen(false); 
     if (type === 'student') {
-      navigate('/StudentDashboard'); // Redirect to Student Dashboard
+      navigate('/StudentDashboard'); 
     } else if (type === 'consultant') {
-      navigate('/consultant-dashboard'); // Redirect to Consultant Dashboard
+      navigate('/consultant-dashboard'); 
     }
   };
 
@@ -43,7 +42,6 @@ const LandingPage = () => {
             help of our consultants. Navigate your application journey with
             WorldWiseEd.
           </SubText>
-          {/* Login Buttons */}
           <ButtonContainer>
             <StudentLoginButton onClick={() => togglePopup('student')}>
               Student Login
@@ -57,12 +55,11 @@ const LandingPage = () => {
           <IllustrationImage src={illustrationImage} alt="Illustration" />
         </Illustration>
       </MainContent>
-      {/* Popup Component */}
       <LoginPopup
         isPopupOpen={isPopupOpen}
         togglePopup={() => togglePopup('')}
         loginType={loginType}
-        handleLogin={handleLogin} // Pass handleLogin function to LoginPopup
+        handleLogin={handleLogin} 
       />
     </Container>
   );
