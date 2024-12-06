@@ -1,28 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';  
 import illustrationImage from './landingImage.png';
+import { Link } from 'react-router-dom';
+import './landingPage.css'; 
 import LoginPopup from './LoginPopup';
 
+
 const LandingPage = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [loginType, setLoginType] = useState('');
-  const navigate = useNavigate(); 
-
-  const togglePopup = (type = '') => {
-    setIsPopupOpen(!isPopupOpen);
-    setLoginType(type);
-  };
-
-  const handleLogin = (type) => {
-    setIsPopupOpen(false); 
-    if (type === 'student') {
-      navigate('/StudentDashboard'); 
-    } else if (type === 'consultant') {
-      navigate('/consultant-dashboard'); 
-    }
-  };
-
   return (
     <Container>
       <NavBar>
@@ -43,24 +27,16 @@ const LandingPage = () => {
             WorldWiseEd.
           </SubText>
           <ButtonContainer>
-            <StudentLoginButton onClick={() => togglePopup('student')}>
-              Student Login
-            </StudentLoginButton>
-            <ConsultantLoginButton onClick={() => togglePopup('consultant')}>
-              Consultant Login
-            </ConsultantLoginButton>
+            <Link to="/student-login">
+              <StudentLoginButton>Student Log in</StudentLoginButton>
+            </Link>
+            <ConsultantLoginButton>Consultant Log in</ConsultantLoginButton>
           </ButtonContainer>
         </TextSection>
         <Illustration>
           <IllustrationImage src={illustrationImage} alt="Illustration" />
         </Illustration>
       </MainContent>
-      <LoginPopup
-        isPopupOpen={isPopupOpen}
-        togglePopup={() => togglePopup('')}
-        loginType={loginType}
-        handleLogin={handleLogin} 
-      />
     </Container>
   );
 };
@@ -68,7 +44,7 @@ const LandingPage = () => {
 // Styled Components
 const Container = styled.div`
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f9ff;
+  background-color: #f4f9ff; /* Light blue background */
   min-height: 100vh;
   padding: 20px 40px;
 `;
@@ -81,7 +57,7 @@ const NavBar = styled.nav`
 `;
 
 const Logo = styled.h1`
-  color: #1a2e6c;
+  color: #1a2e6c; /* Dark blue color */
   font-size: 24px;
   font-weight: bold;
 `;
@@ -94,13 +70,13 @@ const NavLinks = styled.div`
 
 const NavLink = styled.a`
   text-decoration: none;
-  color: #1a2e6c;
+  color: #1a2e6c; /* Dark blue */
   font-size: 16px;
   font-weight: 500;
 `;
 
 const CreateAccountButton = styled.button`
-  background-color: #1a2e6c;
+  background-color: #1a2e6c; /* Dark blue */
   color: white;
   border: none;
   padding: 8px 16px;
@@ -108,9 +84,9 @@ const CreateAccountButton = styled.button`
   cursor: pointer;
   font-size: 14px;
   transition: background-color 0.3s;
-
+  
   &:hover {
-    background-color: #16325c;
+    background-color: #16325c; 
   }
 `;
 
@@ -126,8 +102,8 @@ const TextSection = styled.div`
 `;
 
 const Heading = styled.h2`
-  font-size: 40px;
-  color: #1a2e6c;
+  font-size: 40px; 
+  color: #1a2e6c; /* Dark blue */
   margin-bottom: 20px;
   font-weight: bold;
 `;
@@ -145,25 +121,34 @@ const ButtonContainer = styled.div`
 `;
 
 const StudentLoginButton = styled.button`
-  background-color: #1a2e6c;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 20px;
+  background-color: transparent; /* Dark blue */
+  color: #1a2e6c;
+  border: 2px solid #1a2e6c;
+  padding: 12px 24px;
+  border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: #16325c;
+    background-color: #1a2e6c; /* Dark blue background on hover */
+    color: white; /* White text on hover */
   }
 `;
 
-const ConsultantLoginButton = styled(StudentLoginButton)`
-  background-color: #1a2e6c;
+const ConsultantLoginButton = styled.button`
+  background-color: transparent;
+  color: #1a2e6c; /* Dark blue */
+  border: 2px solid #1a2e6c; 
+  padding: 10px 24px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
 
   &:hover {
-    background-color: #16325c;
+    background-color: #1a2e6c; /* Dark blue background on hover */
+    color: white; /* White text on hover */
   }
 `;
 
