@@ -1,26 +1,38 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';  
+import { useNavigate } from 'react-router-dom';
 import illustrationImage from './landingImage.png';
 import LoginPopup from './LoginPopup';
+import CreateAccountPopup from './CreateAccountPopup';
 
 const LandingPage = () => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
   const [loginType, setLoginType] = useState('');
-  const navigate = useNavigate(); 
+  const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const togglePopup = (type = '') => {
-    setIsPopupOpen(!isPopupOpen);
+  const toggleLoginPopup = (type = '') => {
+    setIsLoginPopupOpen(!isLoginPopupOpen);
     setLoginType(type);
   };
 
+  const toggleCreateAccountPopup = () => {
+    setIsCreateAccountOpen(!isCreateAccountOpen);
+  };
+
   const handleLogin = (type) => {
-    setIsPopupOpen(false); 
+    setIsLoginPopupOpen(false);
     if (type === 'student') {
-      navigate('/student-login'); 
+      navigate('/student-login');
     } else if (type === 'consultant') {
-      navigate('/consultant-dashboard'); 
+      navigate('/consultant-dashboard');
     }
+  };
+
+  const handleCreateAccount = (formData) => {
+    console.log('Account created with data:', formData);
+    alert('Account created successfully!');
+    setIsCreateAccountOpen(false);
   };
 
   return (
@@ -31,7 +43,9 @@ const LandingPage = () => {
           <NavLink href="#">Home</NavLink>
           <NavLink href="#">About</NavLink>
           <NavLink href="#">Contact</NavLink>
-          <CreateAccountButton>Create an account</CreateAccountButton>
+          <CreateAccountButton onClick={toggleCreateAccountPopup}>
+            Create an account
+          </CreateAccountButton>
         </NavLinks>
       </NavBar>
       <MainContent>
@@ -43,10 +57,10 @@ const LandingPage = () => {
             WorldWiseEd.
           </SubText>
           <ButtonContainer>
-            <StudentLoginButton onClick={() => togglePopup('student')}>
+            <StudentLoginButton onClick={() => toggleLoginPopup('student')}>
               Student Login
             </StudentLoginButton>
-            <ConsultantLoginButton onClick={() => togglePopup('consultant')}>
+            <ConsultantLoginButton onClick={() => toggleLoginPopup('consultant')}>
               Consultant Login
             </ConsultantLoginButton>
           </ButtonContainer>
@@ -56,10 +70,15 @@ const LandingPage = () => {
         </Illustration>
       </MainContent>
       <LoginPopup
-        isPopupOpen={isPopupOpen}
-        togglePopup={() => togglePopup('')}
+        isPopupOpen={isLoginPopupOpen}
+        togglePopup={() => toggleLoginPopup('')}
         loginType={loginType}
-        handleLogin={handleLogin} 
+        handleLogin={handleLogin}
+      />
+      <CreateAccountPopup
+        isPopupOpen={isCreateAccountOpen}
+        togglePopup={toggleCreateAccountPopup}
+        handleCreateAccount={handleCreateAccount}
       />
     </Container>
   );
