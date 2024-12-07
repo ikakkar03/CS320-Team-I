@@ -10,7 +10,6 @@ CREATE TABLE users (
     last_name VARCHAR(50) NOT NULL
 );
 
-
 CREATE TABLE students (
     student_id SERIAL PRIMARY KEY, 
     user_id INT UNIQUE REFERENCES users(user_id) ON DELETE CASCADE
