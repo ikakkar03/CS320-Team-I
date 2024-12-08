@@ -28,6 +28,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LandingPage from './landingPage';
 import StudentDashboard from './studentDashboard';
+import CounselorDashboard from './CounselorDashboard';
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
         {/* Define routes for other components here */}
         <Route path="/create-account" element={<h2>Create Account Page</h2>} />
         <Route path="/student-login" element={<StudentDashboard/>} />
-        <Route path="/consultant-login" element={<h2>Consultant Login Page</h2>} />
+        <Route path="/consultant-login" element={<CounselorDashboard />} />
       </Routes>
     </Router>
   );
