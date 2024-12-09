@@ -126,8 +126,9 @@ app.post('/api/counselor/signin', async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // Verify password (use hashed comparison in production)
-    if (user.password_hash !== password) {
+    // Verify the password using bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
@@ -147,6 +148,7 @@ app.post('/api/counselor/signin', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 });
+
 
 app.post('/api/universities', async (req, res) => {
   const { name, country, major_offered, education_level } = req.body;

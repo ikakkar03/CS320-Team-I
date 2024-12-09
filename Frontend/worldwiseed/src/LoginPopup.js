@@ -8,14 +8,40 @@ const LoginPopup = ({ isPopupOpen, togglePopup, loginType }) => {
   const navigate = useNavigate(); 
   if (!isPopupOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (loginType === 'student') {
-      navigate('/student-login'); 
-    } else if (loginType === 'consultant') {
-      navigate('/consultant-login'); 
+  
+    const endpoint =
+      loginType === 'student'
+        ? 'http://localhost:3000/api/student/signin'
+        : 'http://localhost:3000/api/counselor/signin';
+  
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        // Navigate to the appropriate dashboard
+        if (loginType === 'student') {
+          navigate('/student-login');
+        } else {
+          navigate('/counselor-login');
+        }
+      } else {
+        alert(result.message || 'Login failed');
+      }
+    } catch (error) {
+      alert('Network error: ' + error.message);
     }
   };
+  
 
   const heading = loginType === 'student' ? 'Student Login' : 'Consultant Login';
 

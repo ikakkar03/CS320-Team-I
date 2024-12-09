@@ -38,7 +38,7 @@ function App() {
         {/* Define routes for other components here */}
         <Route path="/create-account" element={<h2>Create Account Page</h2>} />
         <Route path="/student-login" element={<StudentDashboard/>} />
-        <Route path="/consultant-login" element={<CounselorDashboard />} />
+        <Route path="/counselor-login" element={<CounselorDashboard />} />
       </Routes>
     </Router>
   );

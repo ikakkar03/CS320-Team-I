@@ -21,13 +21,10 @@ const LandingPage = () => {
   };
 
   const handleLogin = (type) => {
-    setIsLoginPopupOpen(false);
-    if (type === 'student') {
-      navigate('/student-login');
-    } else if (type === 'consultant') {
-      navigate('/consultant-dashboard');
-    }
+    setIsLoginPopupOpen(true);
+    setLoginType(type); // Pass type to LoginPopup
   };
+  
 
   const handleCreateAccount = async (formData) => {
     const dataToSend = {
