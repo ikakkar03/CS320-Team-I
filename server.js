@@ -275,3 +275,57 @@ app.post('/api/checklist', async (req, res) => {
 });
 });
 
+// Add a university to the student's preference list
+app.post('/api/student/add-university', async (req, res) => {
+  const { student_id, university_id, preference_rank } = req.body;
+  if (!student_id || !university_id) {
+    return res.status(400).json({ message: 'Missing student_id or university_id' });
+  }
+  try {
+    // Debug: Check if student_id exists in the request
+    console.log('Received student_id:', student_id);
+    // Check if student exists
+    const studentCheck = await pool.query('SELECT * FROM students WHERE student_id = $1', [student_id]);
+    if (studentCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    // Check if university exists
+    const universityCheck = await pool.query('SELECT * FROM universities WHERE university_id = $1', [university_id]);
+    if (universityCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'University not found' });
+    }
+    // Insert into preferences table
+    const result = await pool.query(
+      `INSERT INTO student_university_preferences (student_id, university_id, preference_rank)
+       VALUES ($1, $2, $3)
+       RETURNING *`,
+      [student_id, university_id, preference_rank || null]
+    );
+    res.status(201).json({
+      message: 'University added to preferences successfully',
+      preference: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Error adding university to preferences:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+});
+
+// Fetch saved colleges for a student
+app.get('/api/student/:student_id/saved-colleges', async (req, res) => {
+  const { student_id } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT u.university_id, u.name, u.country, u.major_offered, u.education_level
+       FROM student_university_preferences sup
+       JOIN universities u ON sup.university_id = u.university_id
+       WHERE sup.student_id = $1
+       ORDER BY sup.preference_rank ASC`,
+      [student_id]
+    );
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching saved colleges:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+});
