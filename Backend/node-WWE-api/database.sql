@@ -57,6 +57,13 @@ CREATE TABLE application_checklist (
     completed BOOLEAN DEFAULT FALSE
 );
 
+CREATE TABLE universities_applied_to (
+    id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES students(student_id) ON DELETE CASCADE,
+    university_id INT REFERENCES universities(university_id) ON DELETE CASCADE, 
+    applied VARCHAR(10) NOT NULL CHECK (applied IN ('Accepted', 'Waitlisted', 'Rejected'))
+);
+
 CREATE TABLE notifications (
     notification_id SERIAL PRIMARY KEY, 
     student_id INT REFERENCES students(student_id) ON DELETE CASCADE, 
