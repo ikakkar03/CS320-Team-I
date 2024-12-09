@@ -3,50 +3,50 @@ const bcrypt = require('bcryptjs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const pool = require('./db'); // Import the db connection
+const cors = require('cors'); // Import the CORS middleware
 
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.json()); // Parse JSON bodies
 
+// Configure CORS
+app.use(cors({ origin: 'http://localhost:3001' }));
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
 app.post('/api/createAccount', async (req, res) => {
-  const { email, password, role, first_name, middle_name, last_name } = req.body;
+  const { email, password, first_name, middle_name, last_name } = req.body;
 
   // Validate the input
-  if (!email || !password || !role || !first_name || !last_name) {
+  if (!email || !password || !first_name || !last_name) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
+    // Hash the password
+    const salt = await bcrypt.genSalt(10); // Generate a salt
+    const hashedPassword = await bcrypt.hash(password, salt); // Hash the password
+
+    // Automatically set the role to 'student'
+    const role = 'student';
+
     // Insert into users table
     const userResult = await pool.query(
       `INSERT INTO users (email, password_hash, first_name, middle_name, last_name, role)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id`,
-      [email, password, first_name, middle_name || null, last_name, role]
+      [email, hashedPassword, first_name, middle_name || null, last_name, role]
     );
 
     const userId = userResult.rows[0].user_id;
 
-    // Insert into students or counselors table based on the role
-    if (role === 'student') {
-      await pool.query(
-        `INSERT INTO students (user_id, first_name, middle_name, last_name)
-         VALUES ($1, $2, $3, $4)`,
-        [userId, first_name, middle_name || null, last_name]
-      );
-    } else if (role === 'counselor') {
-      await pool.query(
-        `INSERT INTO counselors (user_id, first_name, middle_name, last_name)
-         VALUES ($1, $2, $3, $4)`,
-        [userId, first_name, middle_name || null, last_name]
-      );
-    } else {
-      return res.status(400).json({ message: 'Invalid role. Must be "student" or "counselor".' });
-    }
+    // Insert into students table
+    await pool.query(
+      `INSERT INTO students (user_id) VALUES ($1)`,
+      [userId]
+    );
 
     res.status(201).json({ message: 'User registered successfully', userId });
   } catch (error) {
@@ -60,7 +60,6 @@ app.post('/api/createAccount', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 });
-
 
 app.post('/api/student/signin', async (req, res) => {
   const { email, password } = req.body;
@@ -127,8 +126,9 @@ app.post('/api/counselor/signin', async (req, res) => {
 
     const user = userResult.rows[0];
 
-    // Verify password (use hashed comparison in production)
-    if (user.password_hash !== password) {
+    // Verify the password using bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
@@ -148,6 +148,7 @@ app.post('/api/counselor/signin', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 });
+
 
 app.post('/api/universities', async (req, res) => {
   const { name, country, major_offered, education_level } = req.body;
@@ -374,7 +375,6 @@ app.put('/api/universitiesAppliedTo/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 });
-
 // Delete an application from the universities_applied_to table
 app.delete('/api/universitiesAppliedTo/:id', async (req, res) => {
   const { id } = req.params;
@@ -388,6 +388,7 @@ app.delete('/api/universitiesAppliedTo/:id', async (req, res) => {
     );
 
     if (result.rows.length === 0) {
+      console.log("Hello");
       return res.status(404).json({ message: 'Application not found' });
     }
 
@@ -400,4 +401,3 @@ app.delete('/api/universitiesAppliedTo/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 });
-
