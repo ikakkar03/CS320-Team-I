@@ -276,6 +276,40 @@ app.post('/api/checklist', async (req, res) => {
 });
 });
 
+// Delete a task from the checklist
+app.delete('/api/checklist/:task_id', async (req, res) => {
+  const { task_id } = req.params;
+
+  // Validate input
+  if (!task_id) {
+    return res.status(400).json({ error: 'Task ID is required.' });
+  }
+
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      `DELETE FROM application_checklist 
+       WHERE task_id = $1 
+       RETURNING *`,
+      [task_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Task not found.' });
+    }
+
+    res.status(200).json({
+      message: 'Task deleted successfully',
+      deletedTask: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
+
 // Add a new application to the universities_applied_to table
 app.post('/api/universitiesAppliedTo', async (req, res) => {
   const { studentId, universityId, appliedStatus } = req.body;
