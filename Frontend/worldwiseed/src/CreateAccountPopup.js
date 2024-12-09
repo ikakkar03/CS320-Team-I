@@ -3,7 +3,9 @@ import styled from 'styled-components';
 
 const CreateAccountPopup = ({ isPopupOpen, togglePopup, handleCreateAccount }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -16,12 +18,16 @@ const CreateAccountPopup = ({ isPopupOpen, togglePopup, handleCreateAccount }) =
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData); // Debugging step
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
       return;
     }
-    handleCreateAccount(formData);
+  
+    const { confirmPassword, ...dataToSend } = formData; // Exclude confirmPassword
+    handleCreateAccount(dataToSend);
   };
+  
 
   if (!isPopupOpen) return null;
 
@@ -33,9 +39,24 @@ const CreateAccountPopup = ({ isPopupOpen, togglePopup, handleCreateAccount }) =
         <Form onSubmit={handleSubmit}>
           <Input
             type="text"
-            name="name"
-            placeholder="Full Name"
-            value={formData.name}
+            name="first_name"
+            placeholder="First Name"
+            value={formData.first_name}
+            onChange={handleChange}
+            required
+          />
+          <Input
+            type="text"
+            name="middle_name"
+            placeholder="Middle Name (Optional)"
+            value={formData.middle_name}
+            onChange={handleChange}
+          />
+          <Input
+            type="text"
+            name="last_name"
+            placeholder="Last Name"
+            value={formData.last_name}
             onChange={handleChange}
             required
           />

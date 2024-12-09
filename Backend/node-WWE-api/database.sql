@@ -10,7 +10,6 @@ CREATE TABLE users (
     last_name VARCHAR(50) NOT NULL
 );
 
-
 CREATE TABLE students (
     student_id SERIAL PRIMARY KEY, 
     user_id INT UNIQUE REFERENCES users(user_id) ON DELETE CASCADE
@@ -71,3 +70,14 @@ CREATE TABLE counselor_student_assignments (
     counselor_id INT REFERENCES counselors(counselor_id) ON DELETE CASCADE, 
     student_id INT REFERENCES students(student_id) ON DELETE CASCADE
 );
+
+-- Insert default consultants
+INSERT INTO users (email, password_hash, role, first_name, last_name)
+VALUES 
+('counselor1@example.com', '$2y$10$o5ufnS.oW8rhjeKjEoLxs.iaGPFpqwwzqmligr1tOhFDxPJr7D/QK', 'counselor', 'Counselor', 'One'),
+('counselor2@example.com', '$2y$10$pn6hZhxxHsvRCxWspXk6xOKDrE62dsKowMGwnErhBf99Ub/F3/Rga', 'counselor', 'Counselor', 'Two'),
+('counselor3@example.com', '$2y$10$FY3LeRX8JAuitXrIhmdMHulLyllGpBmfy.w/hIm3suZoURmt4JMf.', 'counselor', 'Counselor', 'Three'); -- password1 , password2, password3
+
+-- Link counselors to the counselors table
+INSERT INTO counselors (user_id)
+SELECT user_id FROM users WHERE role = 'counselor';

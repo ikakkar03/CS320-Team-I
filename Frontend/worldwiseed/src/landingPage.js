@@ -29,11 +29,36 @@ const LandingPage = () => {
     }
   };
 
-  const handleCreateAccount = (formData) => {
-    console.log('Account created with data:', formData);
-    alert('Account created successfully!');
-    setIsCreateAccountOpen(false);
+  const handleCreateAccount = async (formData) => {
+    const dataToSend = {
+      first_name: formData.first_name,
+      middle_name: formData.middle_name || null,
+      last_name: formData.last_name,
+      email: formData.email,
+      password: formData.password,
+    };
+  
+    try {
+      const response = await fetch('http://localhost:3000/api/createAccount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        alert('Account created successfully');
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      alert(`Network Error: ${error.message}`);
+    }
   };
+  
+  
+  
 
   return (
     <Container>
