@@ -21,16 +21,13 @@ app.post('/api/createAccount', async (req, res) => {
   
   try {
     // Insert into users table
-    console.log("Hi1");
     const userResult = await pool.query(
       `INSERT INTO users (email, password_hash, first_name, middle_name, last_name, role)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id`,
       [email, password, first_name, middle_name || null, last_name, role]
     );
-    console.log("Hi2");
 
     const userId = userResult.rows[0].user_id;
-    console.log("Hi3");
 
     // Insert into students or counselors table based on the role
     if (role === 'student') {
