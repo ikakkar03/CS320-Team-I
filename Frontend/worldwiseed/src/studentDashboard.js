@@ -1,10 +1,15 @@
 import React, {useState, useEffect, useRef} from 'react';
 import styled from 'styled-components';
+import { FaSignOutAlt } from 'react-icons/fa';
 
 function StudentDashboard() {
     const [taskArr, setTaskArr] = useState([]);
-    const [savedColleges, setSavedColleges] = useState([]);
-    const [appliedColleges, setAppliedColleges] = useState([]); // State for colleges applied to
+    const [savedCollegesArr, setSavedCollegesArr] = useState([]);
+    const [collegesApplied, setCollegesApplied] = useState({
+        accepted: [],
+        waitlisted: [],
+        rejected: [],
+    });
     const [allColleges, setAllColleges] = useState([]);
     const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
     const inputTaskRef = useRef(null);
@@ -12,43 +17,88 @@ function StudentDashboard() {
     const studentId = localStorage.getItem('student_id'); // Fetch student_id from localStorage
   
     useEffect(() => {
-      const inputTask = inputTaskRef.current;
-  
-      const handleKeyUp = (e) => {
-        if (e.key === 'Enter') {
-          const newTask = inputTask.value;
-          if (newTask.trim()) {
-            setTaskArr((prevTasks) => [...prevTasks, newTask]);
-            inputTask.value = '';
-          }
+        const initialColleges = [];
+        for (let i = 1; i <= 8; i++) {
+            initialColleges.push(`College ${i}`);
         }
-      };
-  
-      inputTask.addEventListener('keyup', handleKeyUp);
-  
-      return () => {
-        inputTask.removeEventListener('keyup', handleKeyUp);
-      };
+        setSavedCollegesArr(initialColleges);
     }, []);
-  
-    const removeTask = (index) => {
-      setTaskArr((prevTasks) => prevTasks.filter((_, i) => i !== index));
-    };
-  
+
     useEffect(() => {
-      // Fetch saved colleges
-      fetch(`http://localhost:3000/api/student/${studentId}/saved-colleges`)
-        .then((res) => res.json())
-        .then((data) => setSavedColleges(data))
-        .catch((err) => console.error('Error fetching saved colleges:', err));
-  
-      // Fetch colleges applied to
-      fetch(`http://localhost:3000/api/student/${studentId}/applied-colleges`)
-        .then((res) => res.json())
-        .then((data) => setAppliedColleges(data))
-        .catch((err) => console.error('Error fetching applied colleges:', err));
-    }, [studentId]);
-  
+        const inputTask = inputTaskRef.current;
+
+        const handleKeyUp = (e) => {
+            if (e.key === 'Enter') {
+                const newTask = inputTask.value;
+                if (newTask.trim()) {
+                    setTaskArr((prevTasks) => [
+                        ...prevTasks,
+                        { text: newTask, checked: false },
+                    ]);
+                    inputTask.value = '';
+                }
+            }
+        };
+
+        inputTask.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            inputTask.removeEventListener('keyup', handleKeyUp);
+        };
+    }, []);
+
+    const removeTask = (index) => {
+        setTaskArr((prevTasks) => prevTasks.filter((task, i) => i !== index));
+    };
+
+    const toggleTaskChecked = (index) => {
+        setTaskArr((prevTasks) =>
+            prevTasks.map((task, i) =>
+                i === index ? { ...task, checked: !task.checked } : task
+            )
+        );
+    };
+
+    const handleDragStart = (e, college) => {
+        e.dataTransfer.setData('college', college);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = (e, decisionType) => {
+        e.preventDefault();
+
+        const college = e.dataTransfer.getData('college');
+
+        if (decisionType === 'saved') {
+            setCollegesApplied((prev) => {
+                const newApplied = { ...prev };
+                Object.keys(newApplied).forEach((key) => {
+                    newApplied[key] = newApplied[key].filter((item) => item !== college);
+                });
+                return newApplied;
+            });
+
+            setSavedCollegesArr((prevSaved) => [...prevSaved, college]);
+        } else {
+            setCollegesApplied((prev) => {
+                const newApplied = { ...prev };
+                if (!newApplied[decisionType].includes(college)) {
+                    newApplied[decisionType].push(college);
+                }
+                return newApplied;
+            });
+
+            setSavedCollegesArr((prevSaved) =>
+                prevSaved.filter((item) => item !== college)
+            );
+        }
+
+        e.dataTransfer.clearData();
+    };
+
     const toggleSearchPopup = () => {
       setIsSearchPopupOpen(!isSearchPopupOpen);
       if (!isSearchPopupOpen) {
@@ -75,7 +125,7 @@ function StudentDashboard() {
           .then((data) => {
             if (data.message) {
               alert(data.message);
-              setSavedColleges((prev) => [...prev, data.preference]);
+              setSavedCollegesArr((prev) => [...prev, data.preference]);
             }
           })
           .catch((err) => console.error('Error adding college to preferences:', err));
@@ -88,60 +138,65 @@ function StudentDashboard() {
           <span>My Application</span>
           <span>Colleges</span>
           <span>Counseling</span>
+          <SignoutButton>
+                    <FaSignOutAlt size={30} />
+          </SignoutButton>
         </NavBar>
         <MainContent>
           {/* Application Checklist */}
           <Widget>
-            <h3>Application Checklist</h3>
-            <WidgetBody id="checklist">
-              {taskArr.map((task, index) => (
-                <TaskContainer key={index}>
-                  <Checkbox type="checkbox"></Checkbox>
-                  <div>{task}</div>
-                  <RemoveButton onClick={() => removeTask(index)}>X</RemoveButton>
-                </TaskContainer>
-              ))}
-            </WidgetBody>
-            <InputTask ref={inputTaskRef} id="inputTask" type="text" placeholder="Add new..." />
-          </Widget>
+                    <h3>Application Checklist</h3>
+                    <WidgetBody id="checklist">
+                        {taskArr.map((task, index) => (
+                            <TaskContainer key={index}>
+                                <Checkbox
+                                    type="checkbox"
+                                    checked={task.checked}
+                                    onChange={() => toggleTaskChecked(index)}
+                                />
+                                <div>{task.text}</div>
+                                <RemoveButton onClick={() => removeTask(index)}>X</RemoveButton>
+                            </TaskContainer>
+                        ))}
+                    </WidgetBody>
+                    <InputTask ref={inputTaskRef} id="inputTask" type="text" placeholder="Add new..." />
+                </Widget>
   
           {/* Saved Colleges */}
           <Widget>
-            <h3>Saved Colleges</h3>
-            <WidgetBody>
-              {savedColleges.length > 0 ? (
-                savedColleges.map((college) => (
-                  <CollegeRow key={college.university_id}>
-                    <div>{college.name || 'N/A'}</div>
-                    <div>{college.country || 'N/A'}</div>
-                    <div>{college.major_offered || 'N/A'}</div>
-                    <div>{college.education_level || 'N/A'}</div>
-                  </CollegeRow>
-                ))
-              ) : (
-                <div>No saved colleges found</div>
-              )}
+          <h3>Saved Colleges</h3>
+                    <WidgetBody onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'saved')}>
+                        {savedCollegesArr.map((college, index) => (
+                            <CollegeDiv key={index} draggable onDragStart={(e) => handleDragStart(e, college)}>
+                                {college}
+                            </CollegeDiv>
+                        ))}
             </WidgetBody>
             <CollegeSearchButton onClick={toggleSearchPopup}>Search for Colleges</CollegeSearchButton>
           </Widget>
   
           {/* Colleges Applied To */}
           <Widget>
-            <h3>Colleges Applied To</h3>
-            <WidgetBody>
-              {appliedColleges.length > 0 ? (
-                appliedColleges.map((college) => (
-                  <CollegeRow key={college.university_id}>
-                    <div>{college.name || 'N/A'}</div>
-                    <div>{college.status || 'N/A'}</div>
-                  </CollegeRow>
-                ))
-              ) : (
-                <div>No colleges applied to yet</div>
-              )}
-            </WidgetBody>
-          </Widget>
-        </MainContent>
+          <h3>Colleges Applied To</h3>
+                    <WidgetBody>
+                        {['accepted', 'waitlisted', 'rejected'].map((decisionType) => (
+                            <DecisionContainer key={decisionType}>
+                                <b>{decisionType.charAt(0).toUpperCase() + decisionType.slice(1)}</b>
+                                <DecisionListContainer
+                                    onDragOver={handleDragOver}
+                                    onDrop={(e) => handleDrop(e, decisionType)}
+                                >
+                                    {collegesApplied[decisionType].map((college, index) => (
+                                        <CollegeDiv key={index} draggable onDragStart={(e) => handleDragStart(e, college)}>
+                                            {college}
+                                        </CollegeDiv>
+                                    ))}
+                                </DecisionListContainer>
+                            </DecisionContainer>
+                        ))}
+                    </WidgetBody>
+                </Widget>
+            </MainContent>
   
         {/* Search Popup */}
         {isSearchPopupOpen && (
@@ -178,6 +233,13 @@ const NavBar = styled.div`
   align-items: center;
   padding: 1vh 15vw;
   height: 5vh;
+`;
+
+const SignoutButton = styled.button`
+    background-color: #e4f2ff;
+    border: none;
+    height: 1vh;
+    width: 1vw;
 `;
 
 const MainContent = styled.div`
@@ -227,6 +289,13 @@ const RemoveButton = styled.button`
   color: #ffffff;
 `;
 
+const CollegeDiv = styled.div`
+    background-color: #e9e9e9;
+    margin-bottom: 2vh;
+    padding: 1vh;
+    cursor: pointer;
+`;
+
 const InputTask = styled.input`
   height: 3vh;
   width: 10vw;
@@ -241,12 +310,33 @@ const CollegeRow = styled.div`
 `;
 
 const CollegeSearchButton = styled.button`
-  background-color: #61dafb;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
+    background-color: #e9e9e9;
+    color: #333;
+    border: none;
+    padding: 1vh 2vw;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+`;
+
+const DecisionContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+`;
+
+const DecisionListContainer = styled.div`
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    border-top: 1px solid #ccc;
+    overflow-y: auto;
+    padding: 1vh;
 `;
 
 const SearchPopup = styled.div`
