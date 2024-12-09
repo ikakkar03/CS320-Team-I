@@ -10,30 +10,21 @@ const LoginPopup = ({ isPopupOpen, togglePopup, loginType }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const endpoint =
-      loginType === 'student'
-        ? 'http://localhost:3000/api/student/signin'
-        : 'http://localhost:3000/api/counselor/signin';
+    const endpoint = 'http://localhost:3000/api/student/signin';
   
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
   
       const result = await response.json();
   
       if (response.ok) {
-        // Navigate to the appropriate dashboard
-        if (loginType === 'student') {
-          navigate('/student-login');
-        } else {
-          navigate('/counselor-login');
-        }
+        // Save user ID in local storage or state
+        localStorage.setItem('student_id', result.user.user_id);
+        navigate('/student-login');
       } else {
         alert(result.message || 'Login failed');
       }
@@ -41,6 +32,7 @@ const LoginPopup = ({ isPopupOpen, togglePopup, loginType }) => {
       alert('Network error: ' + error.message);
     }
   };
+  
   
 
   const heading = loginType === 'student' ? 'Student Login' : 'Consultant Login';
