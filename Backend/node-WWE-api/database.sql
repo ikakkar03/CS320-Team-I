@@ -1,4 +1,4 @@
-CREATE DATABASE WorldWiseEd;
+CREATE DATABASE worldwiseed;
 
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
@@ -26,13 +26,6 @@ CREATE TABLE universities (
     country VARCHAR(100),
     major_offered VARCHAR(255),
     education_level VARCHAR(100)
-);
-
-CREATE TABLE student_university_preferences (
-    preference_id SERIAL PRIMARY KEY, 
-    student_id INT REFERENCES students(student_id) ON DELETE CASCADE, 
-    university_id INT REFERENCES universities(university_id) ON DELETE CASCADE, 
-    preference_rank INT
 );
 
 CREATE TABLE activity_calendar (
@@ -84,7 +77,17 @@ CREATE TABLE student_saved_universities (
     university_id INT REFERENCES universities(university_id) ON DELETE CASCADE
 );
 
--- Insert default consultants
+-- Insert defaults
+INSERT INTO users (email, password_hash, role, first_name, last_name)
+VALUES
+('student1@example.com', '$2y$10$9dbszrHXSv5F9eLgjd05XOXeiq3klW5WHmv5cMzmSa2WCDSKolYz.', 'student', 'Student', 'One'),
+('student2@example.com', '$2y$10$9dbszrHXSv5F9eLgjd05XOXeiq3klW5WHmv5cMzmSa2WCDSKolYz.', 'student', 'Student', 'Two'),
+('student3@example.com', '$2y$10$9dbszrHXSv5F9eLgjd05XOXeiq3klW5WHmv5cMzmSa2WCDSKolYz.', 'student', 'Student', 'Three');
+
+-- Link them to the students table
+INSERT INTO students (user_id)
+SELECT user_id FROM users WHERE email IN ('student1@example.com', 'student2@example.com', 'student3@example.com');
+
 INSERT INTO users (email, password_hash, role, first_name, last_name)
 VALUES 
 ('counselor1@example.com', '$2y$10$o5ufnS.oW8rhjeKjEoLxs.iaGPFpqwwzqmligr1tOhFDxPJr7D/QK', 'counselor', 'Counselor', 'One'),
@@ -94,3 +97,16 @@ VALUES
 -- Link counselors to the counselors table
 INSERT INTO counselors (user_id)
 SELECT user_id FROM users WHERE role = 'counselor';
+
+INSERT INTO universities (name, country, major_offered, education_level)
+VALUES 
+('Harvard University', 'USA', 'Various', 'Undergraduate'),
+('Stanford University', 'USA', 'Various', 'Undergraduate'),
+('University of Oxford', 'UK', 'Various', 'Undergraduate'),
+('University of Cambridge', 'UK', 'Various', 'Undergraduate'),
+('Massachusetts Institute of Technology', 'USA', 'Engineering, Science, Technology', 'Undergraduate'),
+('University of Toronto', 'Canada', 'Various', 'Undergraduate'),
+('Tsinghua University', 'China', 'Engineering, Science, Technology', 'Undergraduate'),
+('University of Melbourne', 'Australia', 'Various', 'Undergraduate'),
+('ETH Zurich', 'Switzerland', 'Engineering, Science, Technology', 'Undergraduate'),
+('University of Tokyo', 'Japan', 'Various', 'Undergraduate');
