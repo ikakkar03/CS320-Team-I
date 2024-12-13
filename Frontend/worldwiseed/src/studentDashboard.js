@@ -157,15 +157,12 @@ const refreshData = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          if (data.message === 'University added to saved list successfully') {
-            alert(data.message);
-            // Update savedCollegesArr state
-            setSavedCollegesArr(prev => [...prev, data.university]);
-          }          
           if (data.university) {
-            // Append the returned university object to savedCollegesArr
+            // If we have a university object returned, add it once.
+            alert(data.message);
             setSavedCollegesArr((prev) => [...prev, data.university]);
           } else {
+            // If there's no university object, just alert the message.
             alert(data.message);
           }
         })
@@ -225,6 +222,7 @@ const refreshData = () => {
     {savedCollegesArr.map((college) => (
       <CollegeDiv key={college.university_id} draggable onDragStart={(e) => handleDragStart(e, college)}>
         {college.name}
+      <CollegeRemoveButton onClick={() => removeSavedUniversity(college.university_id)}>Remove</CollegeRemoveButton>
       </CollegeDiv>
     ))}
   </WidgetBody>
@@ -406,6 +404,21 @@ const SearchPopup = styled.div`
   border-radius: 10px;
   padding: 20px;
   z-index: 1000;
+`;
+
+const CollegeRemoveButton = styled.button`
+  background-color: #f8d7da;
+  border: none;
+  padding: 4px 8px;
+  color: #721c24;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
+  
+  &:hover {
+    background-color: #f5c6cb;
+  }
 `;
 
 const CloseButton = styled.button`

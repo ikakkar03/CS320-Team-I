@@ -80,9 +80,9 @@ CREATE TABLE student_saved_universities (
 -- Insert defaults
 INSERT INTO users (email, password_hash, role, first_name, last_name)
 VALUES
-('student1@example.com', '$2y$10$9dbszrHXSv5F9eLgjd05XOXeiq3klW5WHmv5cMzmSa2WCDSKolYz.', 'student', 'Student', 'One'),
-('student2@example.com', '$2y$10$9dbszrHXSv5F9eLgjd05XOXeiq3klW5WHmv5cMzmSa2WCDSKolYz.', 'student', 'Student', 'Two'),
-('student3@example.com', '$2y$10$9dbszrHXSv5F9eLgjd05XOXeiq3klW5WHmv5cMzmSa2WCDSKolYz.', 'student', 'Student', 'Three');
+('student1@example.com', '$2y$10$CKy67VH0M/9Ra8772kk9A.pw.boN3pcnOEIFdM5Ph/nfBxNnOzTJ.', 'student', 'Student', 'One'),
+('student2@example.com', '$2y$10$CKy67VH0M/9Ra8772kk9A.pw.boN3pcnOEIFdM5Ph/nfBxNnOzTJ.', 'student', 'Student', 'Two'),
+('student3@example.com', '$2y$10$CKy67VH0M/9Ra8772kk9A.pw.boN3pcnOEIFdM5Ph/nfBxNnOzTJ.', 'student', 'Student', 'Three');
 
 -- Link them to the students table
 INSERT INTO students (user_id)
