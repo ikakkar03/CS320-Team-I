@@ -61,7 +61,7 @@ CREATE TABLE universities_applied_to (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES students(student_id) ON DELETE CASCADE,
     university_id INT REFERENCES universities(university_id) ON DELETE CASCADE, 
-    applied VARCHAR(10) NOT NULL CHECK (applied IN ('Accepted', 'Waitlisted', 'Rejected'))
+    applied_status VARCHAR(10) NOT NULL CHECK (applied_status IN ('Accepted', 'Waitlisted', 'Rejected'))
 );
 
 CREATE TABLE notifications (
