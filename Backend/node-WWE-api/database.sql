@@ -78,6 +78,12 @@ CREATE TABLE counselor_student_assignments (
     student_id INT REFERENCES students(student_id) ON DELETE CASCADE
 );
 
+CREATE TABLE student_saved_universities (
+    id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES students(student_id) ON DELETE CASCADE,
+    university_id INT REFERENCES universities(university_id) ON DELETE CASCADE
+);
+
 -- Insert default consultants
 INSERT INTO users (email, password_hash, role, first_name, last_name)
 VALUES 

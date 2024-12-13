@@ -13,16 +13,30 @@ function StudentDashboard() {
     const [allColleges, setAllColleges] = useState([]);
     const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
     const inputTaskRef = useRef(null);
-  
-    const studentId = localStorage.getItem('student_id'); // Fetch student_id from localStorage
+
+    const userId = localStorage.getItem('user_id');
+  console.log('Fetched student_id from backend:', localStorage.getItem('student_id'));
+
+
   
     useEffect(() => {
-        const initialColleges = [];
-        for (let i = 1; i <= 8; i++) {
-            initialColleges.push(`College ${i}`);
-        }
-        setSavedCollegesArr(initialColleges);
-    }, []);
+      const studentId = localStorage.getItem('student_id');
+  
+      // Fetch saved colleges from the server
+      fetch(`http://localhost:3000/api/student/${studentId}/saved-colleges`)
+          .then((res) => res.json())
+          .then((data) => setSavedCollegesArr(data))
+          .catch((err) => console.error('Error fetching saved colleges:', err));
+  
+      // Fetch applied colleges from the server
+      fetch(`http://localhost:3000/api/student/${studentId}/applied-colleges`)
+          .then((res) => res.json())
+          .then((data) => {
+              // data = {Accepted: [...], Waitlisted: [...], Rejected: [...]}
+              setCollegesApplied(data);
+          })
+          .catch((err) => console.error('Error fetching applied colleges:', err));
+  }, []);
 
     useEffect(() => {
         const inputTask = inputTaskRef.current;
@@ -59,45 +73,66 @@ function StudentDashboard() {
         );
     };
 
-    const handleDragStart = (e, college) => {
-        e.dataTransfer.setData('college', college);
-    };
+// Modify handleDragStart and handleDrop to work with object arrays:
+const handleDragStart = (e, college) => {
+  e.dataTransfer.setData('university_id', college.university_id);
+};
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-    };
+const handleDragOver = (e) => {
+  e.preventDefault();
+};
 
-    const handleDrop = (e, decisionType) => {
-        e.preventDefault();
+const handleDrop = (e, decisionType) => {
+  e.preventDefault();
+  const university_id = parseInt(e.dataTransfer.getData('university_id'), 10);
+  const studentId = localStorage.getItem('student_id');
 
-        const college = e.dataTransfer.getData('college');
+  if (decisionType === 'saved') {
+    // Move from applied to saved
+    fetch('http://localhost:3000/api/student/unapply-college', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: studentId, university_id }),
+    })
+    .then(res => res.json())
+    .then(() => {
+      refreshData();
+    })
+    .catch(err => console.error('Error moving college back to saved:', err));
+  } else {
+    // Move from saved to applied
+    const applied_status = decisionType.charAt(0).toUpperCase() + decisionType.slice(1);
+    fetch('http://localhost:3000/api/student/apply-college', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: studentId, university_id, applied_status }),
+    })
+    .then(res => res.json())
+    .then(() => {
+      refreshData();
+    })
+    .catch(err => console.error('Error applying to college:', err));
+  }
 
-        if (decisionType === 'saved') {
-            setCollegesApplied((prev) => {
-                const newApplied = { ...prev };
-                Object.keys(newApplied).forEach((key) => {
-                    newApplied[key] = newApplied[key].filter((item) => item !== college);
-                });
-                return newApplied;
-            });
+  e.dataTransfer.clearData();
+};
 
-            setSavedCollegesArr((prevSaved) => [...prevSaved, college]);
-        } else {
-            setCollegesApplied((prev) => {
-                const newApplied = { ...prev };
-                if (!newApplied[decisionType].includes(college)) {
-                    newApplied[decisionType].push(college);
-                }
-                return newApplied;
-            });
 
-            setSavedCollegesArr((prevSaved) =>
-                prevSaved.filter((item) => item !== college)
-            );
-        }
+const refreshData = () => {
+  const studentId = localStorage.getItem('student_id');
+  // Fetch saved
+  fetch(`http://localhost:3000/api/student/${studentId}/saved-colleges`)
+    .then(res => res.json())
+    .then(data => setSavedCollegesArr(data))
+    .catch(err => console.error('Error fetching saved colleges:', err));
 
-        e.dataTransfer.clearData();
-    };
+  // Fetch applied
+  fetch(`http://localhost:3000/api/student/${studentId}/applied-colleges`)
+    .then(res => res.json())
+    .then(data => setCollegesApplied(data))
+    .catch(err => console.error('Error fetching applied colleges:', err));
+};
+
 
     const toggleSearchPopup = () => {
       setIsSearchPopupOpen(!isSearchPopupOpen);
@@ -111,26 +146,47 @@ function StudentDashboard() {
     };
   
     const addCollegeToPreferences = (universityId) => {
-        const studentId = localStorage.getItem('student_id'); // Retrieve from localStorage or context
-      
-        fetch(`http://localhost:3000/api/student/add-university`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            student_id: studentId,
-            university_id: universityId,
-          }),
+      const studentId = localStorage.getItem('student_id');
+      fetch(`http://localhost:3000/api/student/add-university`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_id: studentId,
+          university_id: universityId,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.message === 'University added to saved list successfully') {
+            alert(data.message);
+            // Update savedCollegesArr state
+            setSavedCollegesArr(prev => [...prev, data.university]);
+          }          
+          if (data.university) {
+            // Append the returned university object to savedCollegesArr
+            setSavedCollegesArr((prev) => [...prev, data.university]);
+          } else {
+            alert(data.message);
+          }
         })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.message) {
-              alert(data.message);
-              setSavedCollegesArr((prev) => [...prev, data.preference]);
-            }
-          })
-          .catch((err) => console.error('Error adding college to preferences:', err));
-      };
-      
+        .catch((err) => console.error('Error adding college to preferences:', err));
+  };
+
+  const removeSavedUniversity = (university_id) => {
+    const studentId = localStorage.getItem('student_id');
+    fetch(`http://localhost:3000/api/student/${studentId}/remove-university/${university_id}`, {
+      method: 'DELETE',
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.message) {
+        alert(data.message); 
+        // Refresh saved colleges list
+        refreshData();
+      }
+    })
+    .catch(err => console.error('Error removing saved college:', err));
+  };
   
     return (
       <Container>
@@ -162,40 +218,42 @@ function StudentDashboard() {
                     <InputTask ref={inputTaskRef} id="inputTask" type="text" placeholder="Add new..." />
                 </Widget>
   
-          {/* Saved Colleges */}
-          <Widget>
-          <h3>Saved Colleges</h3>
-                    <WidgetBody onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'saved')}>
-                        {savedCollegesArr.map((college, index) => (
-                            <CollegeDiv key={index} draggable onDragStart={(e) => handleDragStart(e, college)}>
-                                {college}
-                            </CollegeDiv>
-                        ))}
-            </WidgetBody>
-            <CollegeSearchButton onClick={toggleSearchPopup}>Search for Colleges</CollegeSearchButton>
-          </Widget>
+{/* Saved Colleges */}
+<Widget>
+  <h3>Saved Colleges</h3>
+  <WidgetBody onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'saved')}>
+    {savedCollegesArr.map((college) => (
+      <CollegeDiv key={college.university_id} draggable onDragStart={(e) => handleDragStart(e, college)}>
+        {college.name}
+      </CollegeDiv>
+    ))}
+  </WidgetBody>
+  <CollegeSearchButton onClick={toggleSearchPopup}>Search for Colleges</CollegeSearchButton>
+</Widget>
+
   
-          {/* Colleges Applied To */}
-          <Widget>
-          <h3>Colleges Applied To</h3>
-                    <WidgetBody>
-                        {['accepted', 'waitlisted', 'rejected'].map((decisionType) => (
-                            <DecisionContainer key={decisionType}>
-                                <b>{decisionType.charAt(0).toUpperCase() + decisionType.slice(1)}</b>
-                                <DecisionListContainer
-                                    onDragOver={handleDragOver}
-                                    onDrop={(e) => handleDrop(e, decisionType)}
-                                >
-                                    {collegesApplied[decisionType].map((college, index) => (
-                                        <CollegeDiv key={index} draggable onDragStart={(e) => handleDragStart(e, college)}>
-                                            {college}
-                                        </CollegeDiv>
-                                    ))}
-                                </DecisionListContainer>
-                            </DecisionContainer>
-                        ))}
-                    </WidgetBody>
-                </Widget>
+{/* Colleges Applied To */}
+<Widget>
+  <h3>Colleges Applied To</h3>
+  <WidgetBody>
+    {['Accepted', 'Waitlisted', 'Rejected'].map((status) => (
+      <DecisionContainer key={status}>
+        <b>{status}</b>
+        <DecisionListContainer
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, status.toLowerCase())}
+        >
+          {collegesApplied[status]?.map((college) => (
+            <CollegeDiv key={college.university_id} draggable onDragStart={(e) => handleDragStart(e, college)}>
+              {college.name}
+            </CollegeDiv>
+          ))}
+        </DecisionListContainer>
+      </DecisionContainer>
+    ))}
+  </WidgetBody>
+</Widget>
+
             </MainContent>
   
         {/* Search Popup */}

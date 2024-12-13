@@ -28,15 +28,18 @@ const LoginPopup = ({ isPopupOpen, togglePopup, loginType }) => {
       const result = await response.json();
   
       if (response.ok) {
-        // Navigate to the appropriate dashboard
-        if (loginType === 'student') {
-          navigate('/student-login');
+          localStorage.setItem('user_id', result.user.user_id);
+          localStorage.setItem('student_id', result.user.student_id);
+        
+          // Now navigate directly to the dashboard
+          if (loginType === 'student') {
+            navigate('/student-login');
+          } else {
+            navigate('/counselor-login');
+          }
         } else {
-          navigate('/counselor-login');
+          alert(result.message || 'Login failed');
         }
-      } else {
-        alert(result.message || 'Login failed');
-      }
     } catch (error) {
       alert('Network error: ' + error.message);
     }
