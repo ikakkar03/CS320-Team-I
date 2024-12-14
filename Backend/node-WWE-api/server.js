@@ -7,14 +7,14 @@ const cors = require('cors'); // Import the CORS middleware
 
 const app = express();
 
+module.exports = app;
+
+const port = 3000;
 if (process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });
 }
-module.exports = app;
-
-const port = 3000;
 
 app.use(bodyParser.json()); // Parse JSON bodies
 
