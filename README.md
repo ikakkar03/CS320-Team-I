@@ -3,17 +3,17 @@ WorldwiseEd is a comprehensive study abroad consultancy platform designed to str
 We plan to use ReactJS for frontend, Node.js with Express for backend, PostgrSQL for databse, Firebase for authentication, Sendgrid for the email service and AWS for hosting.
 
 Backend Setup
--Navigate to the /Backend/node-WWE-api directory:
--cd Backend/node-WWE-api
--Install the backend dependencies:
--npm install
--Start the backend server:
--npm start
+#Navigate to the /Backend/node-WWE-api directory:
+#cd Backend/node-WWE-api
+#Install the backend dependencies:
+#npm install
+#Start the backend server:
+#npm start
 
 Frontend Setup
--Navigate to the /Frontend/worldwiseed directory:
--cd Frontend/worldwiseed
--Install the frontend dependencies:
--npm install
--Start the frontend development server:
--npm start
+#Navigate to the /Frontend/worldwiseed directory:
+#cd Frontend/worldwiseed
+#Install the frontend dependencies:
+#npm install
+#Start the frontend development server:
+#npm start
