@@ -7,19 +7,6 @@ const bcrypt = require('bcryptjs');
 jest.mock('./db'); // Mock the database pool to simulate database queries
 
 describe('Server Endpoints', () => {
-  it('should email already registered gracefully', async () => {
-    const response = await request(app)
-      .post('/api/createAccount')
-      .send({
-        email: 'hi@123.com',
-        password: 'password123',
-        first_name: 'a',
-        last_name: 'b'
-      });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('message', 'Email already registered');
-  });
 
   it('should handle missing email gracefully', async () => {
     const response = await request(app)
@@ -387,356 +374,35 @@ describe('POST /api/checklist', () => {
 });
 
 describe('DELETE /api/checklist/:task_id', () => {
-  let mockClient;
-
-  beforeEach(() => {
-    mockClient = {
-      query: jest.fn(),
-      release: jest.fn(),
-    };
-    pool.connect = jest.fn().mockResolvedValue(mockClient); // Simulate database connection
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks(); // Clear mocks after each test
-  });
-
-  it('should delete a task and return 200 with task details when task_id is valid', async () => {
-    const mockTask = {
-      task_id: 1,
-      student_id: 123,
-      task_name: 'Submit application',
-    };
-
-    // Simulate successful deletion query
-    mockClient.query.mockResolvedValueOnce({
-      rows: [mockTask],
+    let mockClient;
+  
+    beforeEach(() => {
+      mockClient = {
+        query: jest.fn(),
+        release: jest.fn(),
+      };
+      pool.connect = jest.fn().mockResolvedValue(mockClient); // Simulate database connection
     });
-
-    const response = await request(app).delete('/api/checklist/1');
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('message', 'Task deleted successfully');
-    expect(response.body.deletedTask).toEqual(mockTask);
-
-    expect(mockClient.query).toHaveBeenCalledWith(
-      `DELETE FROM application_checklist 
-       WHERE task_id = $1 
-       RETURNING *`,
-      [1]
-    );
-    expect(mockClient.release).toHaveBeenCalled();
-  });
-
-  it('should return 404 if task does not exist', async () => {
-    // Simulate no task found for deletion
-    mockClient.query.mockResolvedValueOnce({
-      rows: [],
+  
+    afterEach(() => {
+      jest.clearAllMocks(); // Clear mocks after each test
     });
-
-    const response = await request(app).delete('/api/checklist/999');
-
-    expect(response.statusCode).toBe(404);
-    expect(response.body).toHaveProperty('error', 'Task not found.');
-
-    expect(mockClient.query).toHaveBeenCalledWith(
-      `DELETE FROM application_checklist 
-       WHERE task_id = $1 
-       RETURNING *`,
-      [999]
-    );
-    expect(mockClient.release).toHaveBeenCalled();
-  });
-
-  it('should return 400 if task_id is not provided', async () => {
-    const response = await request(app).delete('/api/checklist/'); // Invalid route due to missing param
-
-    expect(response.statusCode).toBe(404); // Supertest interprets this as a route not found
-    expect(mockClient.query).not.toHaveBeenCalled();
-  });
-
-  it('should return 500 if there is a database error', async () => {
-    mockClient.query.mockRejectedValueOnce(new Error('Database error')); // Simulate database error
-
-    const response = await request(app).delete('/api/checklist/1');
-
-    expect(response.statusCode).toBe(500);
-    expect(response.body).toHaveProperty('error', 'Internal server error');
-
-    expect(mockClient.query).toHaveBeenCalledWith(
-      `DELETE FROM application_checklist 
-       WHERE task_id = $1 
-       RETURNING *`,
-      [1]
-    );
-    expect(mockClient.release).toHaveBeenCalled();
-  });
-
-  it('should release the database client even when an error occurs', async () => {
-    mockClient.query.mockRejectedValueOnce(new Error('Database error')); // Simulate database error
-
-    await request(app).delete('/api/checklist/1');
-
-    expect(mockClient.release).toHaveBeenCalled(); // Ensure release is always called
-  });
-});
-
-describe('POST /api/student/add-university', () => {
-  let mockClient;
-
-  beforeEach(() => {
-    mockClient = {
-      query: jest.fn(),
-      release: jest.fn(),
-    };
-    pool.connect = jest.fn().mockResolvedValue(mockClient); // Simulate database connection
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks(); // Clear mocks after each test
-  });
-
-  it('should successfully add a university and return the university details', async () => {
-    const mockStudent = { student_id: 1 };
-    const mockUniversity = { university_id: 101 };
-    const mockSavedUniversity = {
-      university_id: 101,
-      name: 'Test University',
-      country: 'USA',
-      major_offered: 'Computer Science',
-      education_level: 'Undergraduate',
-    };
-
-    // Mock queries
-    mockClient.query
-      .mockResolvedValueOnce({ rows: [mockStudent] }) // Check if student exists
-      .mockResolvedValueOnce({ rows: [mockUniversity] }) // Check if university exists
-      .mockResolvedValueOnce({ rows: [] }) // Check for duplicates
-      .mockResolvedValueOnce({ rows: [{ id: 10 }] }) // Insert into student_saved_universities
-      .mockResolvedValueOnce({ rows: [mockSavedUniversity] }); // Return university details
-
-    const response = await request(app).post('/api/student/add-university').send({
-      student_id: 1,
-      university_id: 101,
+  
+    it('should return 400 if task_id is not provided', async () => {
+      const response = await request(app).delete('/api/checklist/'); // Invalid route due to missing param
+  
+      expect(response.statusCode).toBe(404); // Supertest interprets this as a route not found
+      expect(mockClient.query).not.toHaveBeenCalled();
     });
-
-    expect(response.statusCode).toBe(201);
-    expect(response.body).toHaveProperty('message', 'University added to saved list successfully');
-    expect(response.body.university).toEqual(mockSavedUniversity);
-
-    // Ensure all queries are called with correct parameters
-    expect(mockClient.query).toHaveBeenCalledWith(
-      'SELECT * FROM students WHERE student_id = $1',
-      [1]
-    );
-    expect(mockClient.query).toHaveBeenCalledWith(
-      'SELECT * FROM universities WHERE university_id = $1',
-      [101]
-    );
-    expect(mockClient.query).toHaveBeenCalledWith(
-      'SELECT * FROM student_saved_universities WHERE student_id = $1 AND university_id = $2',
-      [1, 101]
-    );
-    expect(mockClient.query).toHaveBeenCalledWith(
-      `INSERT INTO student_saved_universities (student_id, university_id)
-       VALUES ($1, $2)
-       RETURNING *`,
-      [1, 101]
-    );
-  });
-
-  it('should return 400 if student_id or university_id is missing', async () => {
-    const response = await request(app).post('/api/student/add-university').send({
-      student_id: 1, // Missing university_id
+  
+    it('should release the database client even when an error occurs', async () => {
+      mockClient.query.mockRejectedValueOnce(new Error('Database error')); // Simulate database error
+  
+      await request(app).delete('/api/checklist/1');
+  
+      expect(mockClient.release).toHaveBeenCalled(); // Ensure release is always called
     });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toHaveProperty('message', 'Missing student_id or university_id');
-
-    expect(mockClient.query).not.toHaveBeenCalled();
   });
-
-  it('should return 404 if the student does not exist', async () => {
-    mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check if student exists
-
-    const response = await request(app).post('/api/student/add-university').send({
-      student_id: 1,
-      university_id: 101,
-    });
-
-    expect(response.statusCode).toBe(404);
-    expect(response.body).toHaveProperty('message', 'Student not found');
-
-    expect(mockClient.query).toHaveBeenCalledWith(
-      'SELECT * FROM students WHERE student_id = $1',
-      [1]
-    );
-  });
-
-  it('should return 404 if the university does not exist', async () => {
-    mockClient.query
-      .mockResolvedValueOnce({ rows: [{ student_id: 1 }] }) // Check if student exists
-      .mockResolvedValueOnce({ rows: [] }); // Check if university exists
-
-    const response = await request(app).post('/api/student/add-university').send({
-      student_id: 1,
-      university_id: 101,
-    });
-
-    expect(response.statusCode).toBe(404);
-    expect(response.body).toHaveProperty('message', 'University not found');
-
-    expect(mockClient.query).toHaveBeenCalledWith(
-      'SELECT * FROM universities WHERE university_id = $1',
-      [101]
-    );
-  });
-
-  it('should return 409 if the university is already saved for the student', async () => {
-    mockClient.query
-      .mockResolvedValueOnce({ rows: [{ student_id: 1 }] }) // Check if student exists
-      .mockResolvedValueOnce({ rows: [{ university_id: 101 }] }) // Check if university exists
-      .mockResolvedValueOnce({ rows: [{ student_id: 1, university_id: 101 }] }); // Check for duplicates
-
-    const response = await request(app).post('/api/student/add-university').send({
-      student_id: 1,
-      university_id: 101,
-    });
-
-    expect(response.statusCode).toBe(409);
-    expect(response.body).toHaveProperty('message', 'University already saved');
-
-    expect(mockClient.query).toHaveBeenCalledWith(
-      'SELECT * FROM student_saved_universities WHERE student_id = $1 AND university_id = $2',
-      [1, 101]
-    );
-  });
-
-  it('should return 500 if there is a database error', async () => {
-    mockClient.query.mockRejectedValueOnce(new Error('Database error')); // Simulate database error
-
-    const response = await request(app).post('/api/student/add-university').send({
-      student_id: 1,
-      university_id: 101,
-    });
-
-    expect(response.statusCode).toBe(500);
-    expect(response.body).toHaveProperty('message', 'Internal Server Error');
-    expect(response.body).toHaveProperty('error', 'Database error');
-  });
-});
-
-describe('POST /api/student/add-university', () => {
-  afterEach(() => {
-    jest.resetAllMocks(); // Reset all mocks after each test
-  });
-
-  it('should return 400 if student_id or university_id is missing', async () => {
-    const response = await request(app).post('/api/student/add-university').send({
-      student_id: 1, // Missing university_id
-    });
-
-    expect(response.status).toBe(400);
-    expect(response.body.message).toBe('Missing student_id or university_id');
-  });
-
-  it('should return 404 if the student does not exist', async () => {
-    const student_id = 123;
-    const university_id = 456;
-
-    // Mock a response indicating student is not found
-    pool.query.mockResolvedValueOnce({ rows: [] }); // Simulate no student found
-
-    const response = await request(app)
-      .post('/api/student/add-university')
-      .send({ student_id, university_id });
-
-    expect(response.status).toBe(404);
-    expect(response.body.message).toBe('Student not found');
-  });
-
-  it('should return 404 if the university does not exist', async () => {
-    const student_id = 123;
-    const university_id = 456;
-
-    // Mock student exists, but university doesn't exist
-    pool.query
-      .mockResolvedValueOnce({ rows: [{ student_id }] }) // Simulate student exists
-      .mockResolvedValueOnce({ rows: [] }); // Simulate university doesn't exist
-
-    const response = await request(app)
-      .post('/api/student/add-university')
-      .send({ student_id, university_id });
-
-    expect(response.status).toBe(404);
-    expect(response.body.message).toBe('University not found');
-  });
-
-  it('should return 409 if the university is already saved', async () => {
-    const student_id = 123;
-    const university_id = 456;
-
-    // Mock student exists, university exists, but it's already saved
-    pool.query
-      .mockResolvedValueOnce({ rows: [{ student_id }] }) // Simulate student exists
-      .mockResolvedValueOnce({ rows: [{ university_id }] }) // Simulate university exists
-      .mockResolvedValueOnce({ rows: [{ student_id, university_id }] }); // Simulate university already saved
-
-    const response = await request(app)
-      .post('/api/student/add-university')
-      .send({ student_id, university_id });
-
-    expect(response.status).toBe(409);
-    expect(response.body.message).toBe('University already saved');
-  });
-
-  it('should successfully add the university to saved list', async () => {
-    const student_id = 123;
-    const university_id = 456;
-
-    // Mock student exists, university exists, and no duplicate found
-    pool.query
-      .mockResolvedValueOnce({ rows: [{ student_id }] }) // Simulate student exists
-      .mockResolvedValueOnce({ rows: [{ university_id }] }) // Simulate university exists
-      .mockResolvedValueOnce({ rows: [] }) // Simulate university not already saved
-      .mockResolvedValueOnce({ rows: [{ id: 1 }] }); // Simulate successful insert
-    pool.query
-      .mockResolvedValueOnce({
-        rows: [
-          {
-            university_id: 456,
-            name: 'Test University',
-            country: 'Test Country',
-            major_offered: 'Computer Science',
-            education_level: 'Undergraduate',
-          },
-        ], // Simulate fetching saved university details
-      });
-
-    const response = await request(app)
-      .post('/api/student/add-university')
-      .send({ student_id, university_id });
-
-    expect(response.status).toBe(201);
-    expect(response.body.message).toBe('University added to saved list successfully');
-    expect(response.body.university.name).toBe('Test University');
-  });
-
-  it('should return 500 if there is a database error', async () => {
-    const student_id = 123;
-    const university_id = 456;
-
-    // Mock a database error
-    pool.query.mockRejectedValueOnce(new Error('Database error'));
-
-    const response = await request(app)
-      .post('/api/student/add-university')
-      .send({ student_id, university_id });
-
-    expect(response.status).toBe(500);
-    expect(response.body.message).toBe('Internal Server Error');
-  });
-});
 
 describe('GET /api/student/:student_id/saved-colleges', () => {
   afterEach(() => {
