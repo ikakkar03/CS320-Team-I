@@ -13,9 +13,13 @@ app.use(bodyParser.json()); // Parse JSON bodies
 // Configure CORS
 app.use(cors({ origin: 'http://localhost:3001' }));
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+//change
+module.exports = app;
 
 app.post('/api/createAccount', async (req, res) => {
   const { email, password, first_name, middle_name, last_name } = req.body;
@@ -236,7 +240,6 @@ app.post('/api/student/add-university', async (req, res) => {
     if (studentCheck.rows.length === 0) {
       return res.status(404).json({ message: 'Student not found' });
     }
-
     // Check if university exists
     const universityCheck = await pool.query('SELECT * FROM universities WHERE university_id = $1', [university_id]);
     if (universityCheck.rows.length === 0) {
@@ -302,9 +305,7 @@ app.delete('/api/student/:student_id/remove-university/:university_id', async (r
 
   try {
     const deleteRes = await pool.query(
-      `DELETE FROM student_saved_universities 
-       WHERE student_id = $1 AND university_id = $2 
-       RETURNING *`,
+      `DELETE FROM student_saved_universities WHERE student_id = $1 AND university_id = $2 RETURNING *`,
       [student_id, university_id]
     );
 
@@ -324,10 +325,7 @@ app.get('/api/student/:student_id/applied-colleges', async (req, res) => {
   const { student_id } = req.params;
   try {
     const result = await pool.query(
-      `SELECT u.university_id, u.name, u.country, u.major_offered, u.education_level, ua.applied_status
-       FROM universities_applied_to ua
-       JOIN universities u ON ua.university_id = u.university_id
-       WHERE ua.student_id = $1`,
+      `SELECT u.university_id, u.name, u.country, u.major_offered, u.education_level, ua.applied_status FROM universities_applied_to ua JOIN universities u ON ua.university_id = u.university_id WHERE ua.student_id = $1`,
       [student_id]
     );
 
@@ -354,7 +352,7 @@ app.post('/api/student/apply-college', async (req, res) => {
     // Remove from saved
     await pool.query(
       `DELETE FROM student_saved_universities 
-       WHERE student_id = $1 AND university_id = $2`,
+       WHERE student_id = $1 AND university_id = $2 `,
       [student_id, university_id]
     );
 
@@ -417,4 +415,3 @@ app.get('/api/student-id/:user_id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
-
