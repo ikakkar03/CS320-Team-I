@@ -241,13 +241,12 @@ app.post('/api/student/add-university', async (req, res) => {
   try {
     // Check if student exists
     const studentCheck = await pool.query('SELECT * FROM students WHERE student_id = $1', [student_id]);
-    if (!studentCheck || studentCheck.rows.length === 0) {
+    if (studentCheck.rows.length === 0) {
       return res.status(404).json({ message: 'Student not found' });
     }
-
     // Check if university exists
     const universityCheck = await pool.query('SELECT * FROM universities WHERE university_id = $1', [university_id]);
-    if (!universityCheck || universityCheck.rows.length === 0) {
+    if (universityCheck.rows.length === 0) {
       return res.status(404).json({ message: 'University not found' });
     }
 
@@ -256,7 +255,7 @@ app.post('/api/student/add-university', async (req, res) => {
       'SELECT * FROM student_saved_universities WHERE student_id = $1 AND university_id = $2',
       [student_id, university_id]
     );
-    if (!duplicateCheck || duplicateCheck.rows.length > 0) {
+    if (duplicateCheck.rows.length > 0) {
       return res.status(409).json({ message: 'University already saved' });
     }
 
