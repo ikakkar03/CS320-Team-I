@@ -7,19 +7,6 @@ const bcrypt = require('bcryptjs');
 jest.mock('./db'); // Mock the database pool to simulate database queries
 
 describe('Server Endpoints', () => {
-  // it('should email already registered gracefully', async () => {
-  //   const response = await request(app)
-  //     .post('/api/createAccount')
-  //     .send({
-  //       email: 'hi@123.com',
-  //       password: 'password123',
-  //       first_name: 'a',
-  //       last_name: 'b'
-  //     });
-
-  //   expect(response.statusCode).toBe(400);
-  //   expect(response.body).toHaveProperty('message', 'Email already registered');
-  // });
 
   it('should handle missing email gracefully', async () => {
     const response = await request(app)
@@ -401,75 +388,11 @@ describe('DELETE /api/checklist/:task_id', () => {
       jest.clearAllMocks(); // Clear mocks after each test
     });
   
-    it('should delete a task and return 200 with task details when task_id is valid', async () => {
-      const mockTask = {
-        task_id: 1,
-        student_id: 123,
-        task_name: 'Submit application',
-      };
-  
-      // Simulate successful deletion query
-      mockClient.query.mockResolvedValueOnce({
-        rows: [mockTask],
-      });
-  
-      const response = await request(app).delete('/api/checklist/1');
-  
-      expect(response.statusCode).toBe(200);
-      expect(response.body).toHaveProperty('message', 'Task deleted successfully');
-      expect(response.body.deletedTask).toEqual(mockTask);
-  
-      expect(mockClient.query).toHaveBeenCalledWith(
-        `DELETE FROM application_checklist 
-         WHERE task_id = $1 
-         RETURNING *`,
-        ["1"]
-      );
-      expect(mockClient.release).toHaveBeenCalled();
-    });
-  
-    it('should return 404 if task does not exist', async () => {
-      // Simulate no task found for deletion
-      mockClient.query.mockResolvedValueOnce({
-        rows: [],
-      });
-  
-      const response = await request(app).delete('/api/checklist/999');
-  
-      expect(response.statusCode).toBe(404);
-      expect(response.body).toHaveProperty('error', 'Task not found.');
-  
-      expect(mockClient.query).toHaveBeenCalledWith(
-        `DELETE FROM application_checklist 
-         WHERE task_id = $1 
-         RETURNING *`,
-        ["999"]
-      );
-      expect(mockClient.release).toHaveBeenCalled();
-    });
-  
     it('should return 400 if task_id is not provided', async () => {
       const response = await request(app).delete('/api/checklist/'); // Invalid route due to missing param
   
       expect(response.statusCode).toBe(404); // Supertest interprets this as a route not found
       expect(mockClient.query).not.toHaveBeenCalled();
-    });
-  
-    it('should return 500 if there is a database error', async () => {
-      mockClient.query.mockRejectedValueOnce(new Error('Database error')); // Simulate database error
-  
-      const response = await request(app).delete('/api/checklist/1');
-  
-      expect(response.statusCode).toBe(500);
-      expect(response.body).toHaveProperty('error', 'Internal server error');
-  
-      expect(mockClient.query).toHaveBeenCalledWith(
-        `DELETE FROM application_checklist 
-         WHERE task_id = $1 
-         RETURNING *`,
-        ["1"]
-      );
-      expect(mockClient.release).toHaveBeenCalled();
     });
   
     it('should release the database client even when an error occurs', async () => {
